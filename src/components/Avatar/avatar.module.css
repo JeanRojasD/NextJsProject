@@ -1,0 +1,10 @@
+.avatar{
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    list-style: none;
+}
+
+.avatar li{
+    margin-left: 5px;
+}

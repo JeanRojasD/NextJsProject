@@ -1,0 +1,42 @@
+.article {
+    max-width: 486px;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    border-radius: 8px;
+    color: white;
+    background-color: #171D1F;
+}
+
+
+.article header {
+    background-color: #888888;
+    border-radius: 8px 8px 0px 0px;
+    padding: 10px;
+}
+
+.link{
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.figure {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.section {
+    background-color: #171D1F;
+    padding: 0px 16px 0px 16px;
+}
+
+.figure img {
+    border-radius: 8px;
+}
+
+.footer {
+    display: flex;
+    justify-content: flex-end;
+    padding: 16px;
+}

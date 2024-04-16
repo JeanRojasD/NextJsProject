@@ -1,94 +1,86 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+import CardPost from "@/components/CardPost";
+import logger from "@/logger";
+import styles from './page.module.css'
+import Link from "next/link";
 
-export default function Home() {
+interface Post {
+  id: number;
+  cover: string;
+  title: string;
+  slug: string;
+  body: string;
+  markdown: string;
+  author: {
+    id: number;
+    name: string;
+    username: string;
+    avatar: string;
+  };
+}
+
+interface Pagination {
+  first?: number | null;
+  prev?: number | null;
+  next?: number | null;
+  last?: number | null;
+  pages?: number;
+  items?: number;
+}
+
+
+interface PostsResponse {
+  pagination: Pagination;
+  data: Post[];
+}
+
+interface SearchParams {
+  page?: string;
+}
+
+
+async function getAllPosts(page: number): Promise<PostsResponse> {
+  const response = await fetch(`http://localhost:3042/posts?_page=${page}&_per_page=6`);
+  if (!response.ok) {
+    logger.error("Algo de errado com sua consulta");
+    return { pagination: {}, data: [] };
+  }
+  logger.info('Posts obtidos com sucesso');
+  const responseData = await response.json();
+
+  const pagination: Pagination = {
+    first: responseData.first || 1,
+    prev: responseData.prev || null,
+    next: responseData.next || null,
+    last: responseData.last || 1,
+    pages: responseData.pages || 1,
+    items: responseData.items || 0
+  };
+
+  const data: Post[] = responseData.data || [];
+
+  return { pagination, data };
+}
+
+
+export default async function Home({ searchParams }: { searchParams: SearchParams }) {
+  let currentPage: number;
+  if (typeof searchParams.page === 'string') {
+    currentPage = parseInt(searchParams.page);
+  } else {
+    currentPage = searchParams.page || 1;
+  }
+  const { pagination, data: posts } = await getAllPosts(currentPage);
+
   return (
     <main className={styles.main}>
-      <div className={styles.description}>
-        <p>
-          Get started by editing&nbsp;
-          <code className={styles.code}>src/app/page.tsx</code>
-        </p>
-        <div>
-          <a
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{" "}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className={styles.vercelLogo}
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
+      {posts.map(post => (
+        <CardPost key={post.id} post={post} />
+      ))}
+      <div className={styles.pagination}>
+        <div className={styles.pagination_options}>
+          {pagination.prev && <Link className={styles.link} href={`/?page=${pagination.prev}`}>Página anterior</Link>}
+          {pagination.next && <Link className={styles.link} href={`/?page=${pagination.next}`}>Próxima página </Link>}
         </div>
-      </div>
-
-      <div className={styles.center}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
-
-      <div className={styles.grid}>
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Docs <span>-&gt;</span>
-          </h2>
-          <p>Find in-depth information about Next.js features and API.</p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Learn <span>-&gt;</span>
-          </h2>
-          <p>Learn about Next.js in an interactive course with&nbsp;quizzes!</p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Templates <span>-&gt;</span>
-          </h2>
-          <p>Explore starter templates for Next.js.</p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Deploy <span>-&gt;</span>
-          </h2>
-          <p>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
       </div>
     </main>
   );
